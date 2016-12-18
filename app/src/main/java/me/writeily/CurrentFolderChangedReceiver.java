@@ -1,9 +1,14 @@
 package me.writeily;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.widget.TextView;
 
 import java.io.File;
@@ -33,7 +38,11 @@ class CurrentFolderChangedReceiver extends BroadcastReceiver {
             breadcrumbs.setVisibility(View.GONE);
         } else {
             breadcrumbs.setText(backButtonText(currentDir, rootDir));
-            breadcrumbs.setVisibility(View.VISIBLE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                showCircularReveal(breadcrumbs);
+            } else {
+                breadcrumbs.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -43,5 +52,49 @@ class CurrentFolderChangedReceiver extends BroadcastReceiver {
         } else {
             return "... > " + currentDir.getParentFile().getName() + " > " + currentDir.getName();
         }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void showCircularReveal(View view) {
+        final View myView = view;
+        myView.setVisibility(View.INVISIBLE);
+        final int height = myView.getHeight() / 2;
+        myView.setTranslationY(-height);
+        myView.animate()
+                .translationY(0)
+                .setDuration(300)
+                .setStartDelay(100)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        myView.setVisibility(View.VISIBLE);
+                        final int cx = myView.getWidth() / 2;
+                        final int cy = myView.getHeight() / 2;
+                        final int finalRadius = Math.max(myView.getWidth(), myView.getHeight());
+                        Animator anim = ViewAnimationUtils.createCircularReveal(myView, cx, cy, 0, finalRadius);
+                        anim.addListener(new Animator.AnimatorListener() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationCancel(Animator animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animator animation) {
+
+                            }
+                        });
+                        anim.start();
+                    }
+                })
+                .start();
     }
 }
