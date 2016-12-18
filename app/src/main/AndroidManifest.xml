@@ -24,10 +24,13 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:mimeType="text/plain"
+                    android:scheme="file"/>
+                <data android:mimeType="application/octet-stream"
                     android:scheme="file"/>
             </intent-filter>
 
